@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>OSINT Email Scanner</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            primary: "#2563eb",
+            dark: "#0f172a",
+          },
+        },
+      },
+    };
+  </script>
+  <style>
+    html {
+      scroll-behavior: smooth;
+    }
+    body {
+      background: linear-gradient(to right, #0f2027, #203a43, #2c5364);
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .animate-fade-in {
+      animation: fadeIn 1.5s ease-out;
+    }
+  </style>
+</head>
+<body class="text-white font-sans">
+
+  <!-- LOADING SCREEN -->
+  <div id="loading-screen" class="fixed inset-0 bg-dark flex items-center justify-center z-50">
+    <div class="flex flex-col items-center animate-fade-in">
+      <div class="animate-spin h-10 w-10 border-4 border-blue-500 border-t-transparent rounded-full mb-4"></div>
+      <p class="text-lg font-medium">Loading OSINT Scanner...</p>
+    </div>
+  </div>
+
+  <!-- MAIN CONTENT -->
+  <div id="main-content" class="hidden">
+    <!-- HERO / LANDING SECTION -->
+    <section class="min-h-screen flex flex-col items-center justify-center text-center px-4">
+      <h1 class="text-5xl md:text-6xl font-bold mb-4">OSINT Email Checker</h1>
+      <p class="text-xl md:text-2xl text-gray-300 max-w-xl mb-8">Check if your email has been involved in data breaches using open-source intelligence.</p>
+      <a href="#check-section" class="bg-primary hover:bg-blue-700 px-6 py-3 rounded-full font-semibold transition text-white text-lg">
+        Start Checking
+      </a>
+    </section>
+
+    <!-- EMAIL CHECK SECTION -->
+    <section id="check-section" class="min-h-screen flex items-center justify-center px-4 py-20">
+      <div class="bg-white/10 backdrop-blur-md p-8 rounded-2xl shadow-lg max-w-md w-full border border-white/20 animate-fade-in">
+        <h2 class="text-3xl font-bold text-center mb-6 text-white">Enter Your Email</h2>
+        <div class="space-y-4">
+          <input id="email" type="email" placeholder="e.g. someone@example.com"
+            class="w-full px-4 py-3 rounded-lg bg-white/20 text-white placeholder-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-400"/>
+          <button onclick="checkEmail()"
+            class="w-full py-3 bg-blue-600 hover:bg-blue-700 transition rounded-lg font-semibold tracking-wide">
+            Search
+          </button>
+        </div>
+        <div id="loading" class="hidden mt-4 flex items-center justify-center">
+          <div class="animate-spin h-6 w-6 border-4 border-blue-400 border-t-transparent rounded-full"></div>
+        </div>
+        <pre id="result"
+          class="mt-6 bg-white/10 text-sm p-4 rounded-lg whitespace-pre-wrap overflow-x-auto text-gray-100 max-h-80"></pre>
+      </div>
+    </section>
+
+    <!-- SECURITY EDUCATION SECTION -->
+    <section class="py-24 px-8 text-center bg-dark text-gray-200">
+      <div class="max-w-4xl mx-auto">
+        <h2 class="text-4xl font-bold mb-6">Why Email Security Matters</h2>
+        <p class="text-lg mb-6">In 2024 alone, billions of accounts were exposed due to breaches. Cybercriminals exploit leaked credentials to commit identity theft, financial fraud, and more.</p>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mt-10">
+          <div class="p-6 rounded-xl bg-white/10 shadow-md">
+            <h3 class="text-xl font-semibold mb-2">Phishing Attacks</h3>
+            <p>Emails from breached databases are commonly targeted with phishing scams.</p>
+          </div>
+          <div class="p-6 rounded-xl bg-white/10 shadow-md">
+            <h3 class="text-xl font-semibold mb-2">Credential Stuffing</h3>
+            <p>Hackers use your old passwords across sites. If reused, you’re vulnerable.</p>
+          </div>
+          <div class="p-6 rounded-xl bg-white/10 shadow-md">
+            <h3 class="text-xl font-semibold mb-2">Data Privacy</h3>
+            <p>Knowing your exposure helps you take control of your online identity and safety.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- FAQ SECTION -->
+    <section class="bg-white text-gray-800 py-20 px-6">
+      <div class="max-w-4xl mx-auto">
+        <h2 class="text-4xl font-bold text-center mb-10">Frequently Asked Questions</h2>
+        <div class="space-y-6">
+          <div>
+            <h3 class="font-semibold text-lg">Is this tool secure?</h3>
+            <p class="text-gray-600">Yes, no data is stored. All requests are made in real-time and not logged.</p>
+          </div>
+          <div>
+            <h3 class="font-semibold text-lg">What sources do you check?</h3>
+            <p class="text-gray-600">We use trusted APIs like Have I Been Pwned to verify if your email is in any known breaches.</p>
+          </div>
+          <div>
+            <h3 class="font-semibold text-lg">Can I use this for multiple emails?</h3>
+            <p class="text-gray-600">Absolutely. You can check as many emails as needed, one at a time.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- FOOTER -->
+    <footer class="text-center text-gray-400 p-6 text-sm bg-dark">
+      Made by lorosu — <a href="https://github.com/lorosu/OSINT-TOOL" class="underline hover:text-white">View on GitHub</a>
+    </footer>
+  </div>
+
+  <!-- SCRIPT -->
+  <script>
+    window.addEventListener("load", () => {
+      const loadingScreen = document.getElementById("loading-screen");
+      const mainContent = document.getElementById("main-content");
+      setTimeout(() => {
+        loadingScreen.classList.add("hidden");
+        mainContent.classList.remove("hidden");
+      }, 1800);
+    });
+
+    async function checkEmail() {
+      const email = document.getElementById("email").value;
+      const result = document.getElementById("result");
+      const loading = document.getElementById("loading");
+
+      if (!email) {
+        result.textContent = "❌ Please enter an email address.";
+        return;
+      }
+
+      result.textContent = "";
+      loading.classList.remove("hidden");
+
+      try {
+        const res = await fetch(`http://localhost:8000/check/email?email=${email}`);
+        const data = await res.json();
+        result.textContent = JSON.stringify(data, null, 2);
+      } catch (err) {
+        result.textContent = "⚠️ Error fetching data. Check if the API is running.";
+      } finally {
+        loading.classList.add("hidden");
+      }
+    }
+  </script>
+</body>
+</html>
